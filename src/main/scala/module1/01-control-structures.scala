@@ -24,9 +24,17 @@ object controlStructures {
 
 
 
+  val cond: Boolean = true
+
   //1. Напишите выражение, которое в зависимости от значения выражения cond
   // будет возвращать "yes" или "no",
   // присвойте его в переменную х1
+
+  val x = if(cond) {
+            "yes"
+  } else {
+    "no"
+  }
 
 
 
@@ -35,7 +43,7 @@ object controlStructures {
   // будет печатать "yes" или "no" в консоль,
   // присвойте его в переменную х2
 
-
+   val x2: Unit = if(cond) println("yes") else println("no")
 
 
   //3. Напишите выражение, которое если значение переменной cond будет true напечатает в консоль "yes", а если
@@ -43,6 +51,7 @@ object controlStructures {
   // присвойте его в переменную х3
 
 
+  val x3: Any = if(cond) println("yes") else "no"
 
 
   /**
@@ -51,11 +60,22 @@ object controlStructures {
    * Отличаются моментом, когда происходит проверка условия ДО или ПОСЛЕ выполнения тела цикла
    */
 
+   val x4 = do{
+     println("while")
+     1 + 1
+   }while(cond)
+
 
   /**
    * цикл for позволяет итерироваться по коллекциям,
    * имеет своеобразный синтаксис с обратной стрелочкой
    */
 
+  val arr = Array(1, 2, 3)
+  val range: Range = 0 until 10
+  val x5: Unit = for(i <- range){
+    println(i)
+    i
+  }
 
 }
