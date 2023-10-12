@@ -5,8 +5,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     println("Hello world ")
 
-    val f: String => Unit =  hof.logRunningTime(hof.doomy)
-
-    f("foo")
+    val t: Unit = true
+    print(t)
   }
 }
