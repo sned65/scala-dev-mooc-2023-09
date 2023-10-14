@@ -3,7 +3,10 @@ package module1
 import java.util.UUID
 import scala.annotation.tailrec
 import java.time.Instant
+import scala.collection.immutable.{AbstractSeq, LinearSeq}
+import scala.collection.mutable
 import scala.language.postfixOps
+import scala.xml.NodeSeq
 
 
 
@@ -221,6 +224,43 @@ object hof{
        case Some(v) => f(v)
        case None => None
      }
+
+
+      /**
+       *
+       * Реализовать метод printIfAny, который будет печатать значение, если оно есть
+       */
+      def printIfAny(): Unit = {
+          val s = this match {
+              case Some(v) => v.toString
+              case None => ""
+          }
+          println(s)
+      }
+
+
+      /**
+       *
+       * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
+       */
+      
+      def zip[A](other: Option[A]): Option[(T,A)] = {
+          (this, other) match {
+              case (Some(x), Some(y)) => Some((x, y))
+              case _ => None
+          }
+      }
+
+
+      /**
+       *
+       * Реализовать метод filter, который будет возвращать не пустой Option
+       * в случае если исходный не пуст и предикат от значения = true
+       */
+        def filter(f: T => Boolean): Option[T] = this match {
+            case Some(v) if f(v) => Some(v)
+            case _ => None
+        }
   }
 
   val opt: Option[Int] = ???
@@ -240,27 +280,6 @@ object hof{
 
 
 
-
-
-
-  /**
-   *
-   * Реализовать метод printIfAny, который будет печатать значение, если оно есть
-   */
-
-
-  /**
-   *
-   * Реализовать метод zip, который будет создавать Option от пары значений из 2-х Option
-   */
-
-
-  /**
-   *
-   * Реализовать метод filter, который будет возвращать не пустой Option
-   * в случае если исходный не пуст и предикат от значения = true
-   */
-
  }
 
  object list {
@@ -273,10 +292,116 @@ object hof{
     */
 
     sealed trait List[+T]{
-      def ::[TT >: T](elem: TT): List[TT] = ???
-    }
 
-    case class Cons[A](head: A, tail: List[A]) extends List[A]
+       /**
+        * Метод cons, добавляет элемент в голову списка, для этого метода можно воспользоваться названием `::`
+        *
+        */
+       def ::[TT >: T](elem: TT): List[TT] = Cons(elem, this)
+
+       /**
+        * Метод mkString возвращает строковое представление списка, с учетом переданного разделителя
+        *
+        */
+       def mkString(sep: String): String = {
+           /* Non tailrec
+           this match {
+               case Cons(head, Nil) => head.toString
+               case Cons(head, tail) => head.toString + sep + tail.mkString(sep)
+               case Nil => ""
+           }
+           */
+           @tailrec
+           def go(lst: List[T], sb: StringBuilder): StringBuilder = lst match {
+               case Cons(head, Nil) =>
+                   sb ++= head.toString
+               case Cons(head, tail) =>
+                   sb ++= head.toString + sep
+                   go(tail, sb)
+               case Nil => sb
+           }
+           
+           go(this, new StringBuilder()).toString()
+       }
+
+       /**
+        *
+        * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
+        */
+       def reverse: List[T] = {
+           @tailrec
+           def go(lst: List[T], acc: List[T]): List[T] = {
+               lst match {
+                   case Cons(head, tail) =>
+                       go(tail, head :: acc)
+                   case Nil => acc
+               }
+           }
+
+           go(this, Nil)
+       }
+
+       /**
+        *
+        * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
+        */
+       def map[U](f: T => U): List[U] = {
+           /* Non tailrec
+           this match {
+               case Cons(head, tail) => f(head) :: tail.map(f)
+               case Nil => Nil
+           }
+           */
+           @tailrec
+           def go(lst: List[T], acc: List[U]) : List[U] = lst match {
+               case Cons(head, tail) => go(tail, f(head) :: acc)
+               case Nil => acc.reverse
+           }
+           
+           go(this, Nil)
+       }
+
+       /**
+        *
+        * Реализовать метод filter для списка который будет фильтровать список по некому условию
+        */
+       def filter(f: T => Boolean): List[T] = {
+           /* Non tailrec
+           this match {
+               case Nil => Nil
+               case Cons(head, tail) =>
+                   if (f(head)) head :: tail.filter(f)
+                   else tail.filter(f)
+           }
+            */
+           @tailrec
+           def go(lst: List[T], acc: List[T]): List[T] = lst match {
+               case Cons(head, tail) =>
+                   if (f(head)) go(tail, head :: acc)
+                   else go(tail, acc)
+               case Nil => acc.reverse
+           }
+           
+           go(this, Nil)
+       }
+   }
+
+    case class Cons[A](head: A, tail: List[A]) extends List[A] {
+
+         /**
+          * Конструктор, позволяющий создать список из N - го числа аргументов
+          * Для этого можно воспользоваться *
+          *
+          * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
+          * def printArgs(args: Int*) = args.foreach(println(_))
+          */
+
+        // Не уверен, что это (Конструктор) в принципе можно сделать.
+        // Конструктор не может быть у trait или object, единственное место - это в Cons.
+        // Любой доп. конструктор должен начинаться с вызова другого конструктора,
+        // а нам сначала нужна проверка на пустоту.
+        // Нормальным решением является метод apply() в object List, но он был сделан на занятии.
+     }
     case object Nil extends List[Nothing]
 
    object List{
@@ -285,59 +410,12 @@ object hof{
        else Cons(v.head, apply(v.tail:_*))
    }
 
-   Cons(1, Nil) // List(1)
-   Cons(1, Cons(2, Nil)) // List(1, 2, 3)
-   Cons(1, Cons(2, Cons(3, Nil))) // List()
+//   Cons(1, Nil) // List(1)
+//   Cons(1, Cons(2, Nil)) // List(1, 2, 3)
+//   Cons(1, Cons(2, Cons(3, Nil))) // List()
 
 
    // List(1, 2)
 
-
-   /**
-     * Метод cons, добавляет элемент в голову списка, для этого метода можно воспользоваться названием `::`
-     *
-     */
-
-    /**
-      * Метод mkString возвращает строковое представление списка, с учетом переданного разделителя
-      *
-      */
-
-    /**
-      * Конструктор, позволяющий создать список из N - го числа аргументов
-      * Для этого можно воспользоваться *
-      * 
-      * Например вот этот метод принимает некую последовательность аргументов с типом Int и выводит их на печать
-      * def printArgs(args: Int*) = args.foreach(println(_))
-      */
-
-    /**
-      *
-      * Реализовать метод reverse который позволит заменить порядок элементов в списке на противоположный
-      */
-
-    /**
-      *
-      * Реализовать метод map для списка который будет применять некую ф-цию к элементам данного списка
-      */
-
-
-    /**
-      *
-      * Реализовать метод filter для списка который будет фильтровать список по некому условию
-      */
-
-    /**
-      *
-      * Написать функцию incList котрая будет принимать список Int и возвращать список,
-      * где каждый элемент будет увеличен на 1
-      */
-
-
-    /**
-      *
-      * Написать функцию shoutString котрая будет принимать список String и возвращать список,
-      * где к каждому элементу будет добавлен префикс в виде '!'
-      */
 
  }
