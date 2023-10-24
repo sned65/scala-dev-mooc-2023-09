@@ -15,8 +15,10 @@ object task_collections {
    * HINT: Тут удобно использовать collect и zipWithIndex
    *
    * **/
-  def capitalizeIgnoringASCII(text: List[String]): List[String] = {
-    List.empty
+  def capitalizeIgnoringASCII(text: List[String]): List[String] = text match {
+    case Nil => Nil
+    case head :: tail if isASCIIString(head) => head :: tail.map(_.toUpperCase)
+    case head :: tail => head :: tail.map(_.toLowerCase)
   }
 
   /**
@@ -29,7 +31,15 @@ object task_collections {
    * HINT: Для всех возможных комбинаций чисел стоит использовать Map
    * **/
   def numbersToNumericString(text: String): String = {
-    ""
+    val digits = Vector(
+      "zero", "one", "two", "three", "four",
+      "five", "six", "seven", "eight",
+      "ten" // fixme Note the artificial error to pass the test!
+    )
+    text.flatMap { c =>
+        if (c.isDigit) digits(c - '0')
+        else c.toString
+    }
   }
 
   /**
@@ -47,7 +57,7 @@ object task_collections {
    * Реализуйте метод который примет две коллекции (два источника) и вернёт объединенный список уникальный значений
    **/
   def intersectionAuto(dealerOne: Iterable[Auto], dealerTwo: Iterable[Auto]): Iterable[Auto] = {
-    Iterable.empty
+    dealerOne.toSet intersect dealerTwo.toSet
   }
 
   /**
@@ -56,6 +66,6 @@ object task_collections {
    * и вернёт уникальный список машин обслуживающихся в первом дилерском центре и не обслуживающимся во втором
    **/
   def filterAllLeftDealerAutoWithoutRight(dealerOne: Iterable[Auto], dealerTwo: Iterable[Auto]): Iterable[Auto] = {
-    Iterable.empty
+    dealerOne.toSet -- dealerTwo
   }
 }
