@@ -7,8 +7,8 @@ object App {
   def main(args: Array[String]): Unit = {
     println("Hello world")
 
-    val r: UIO[Unit] = zioConstructors.z12.provide("Hello from ZIO")
-    zio.Runtime.default.unsafeRun(r)
+   // println(zioRecursion.factorial(10000))
+    zio.Runtime.default.unsafeRun(multipleErrors.app)
 
   }
 }
